@@ -76,7 +76,7 @@ test('Test case 1: Resgister user.', async ({page}) => {
 });
 
    // Test case 2: Verify product quantity in cart
-test.only('Test case 2: Verify product quantity in cart', async ({page}) => {
+test('Test case 2: Verify product quantity in cart', async ({page}) => {
 
      // to block ads and trackers.
     await page.route('**/*google*/**', route => route.abort());
@@ -428,4 +428,207 @@ test('Test case 10: Verify Subscription in home page', async ({page}) => {
 
     //verify success message 'You have been successfully subscribed!' is visible
     await expect(page.locator('div[class="alert-success alert"]')).toBeVisible();
+});
+
+    //Test case 11: Verify Subscription in cart page
+test('Test case 11: Verify Subscription in cart page', async ({page}) => {
+    // to block ads and trackers.
+    await page.route('**/*google*/**', route => route.abort());
+    await page.route('**/*doubleclick*/**', route => route.abort());
+    await page.route('**/*adservice*/**', route => route.abort());
+
+    // Go to the automation exercise website
+    await page.goto('https://automationexercise.com/');
+
+    //verify that home page is visible successfully
+    await expect(page).toHaveURL('https://automationexercise.com/');
+
+    //click on 'Cart' button
+    await page.locator('a[href="/view_cart"]').nth(0).click();
+
+    //verify user is navigated to CART page successfully
+    await expect(page).toHaveURL('https://automationexercise.com/view_cart');
+
+    //scroll down to footer
+    await page.locator('footer').scrollIntoViewIfNeeded();
+
+    //verify 'SUBSCRIPTION' is visible
+    await expect(page.locator('h2:has-text("Subscription")')).toBeVisible();    
+
+    //Enter email address in input and click arrow button
+    await page.locator('input[id="susbscribe_email"]').fill('jostemi70@gmail.com');
+    await page.locator('button[id="subscribe"]').click();
+
+    //verify success message 'You have been successfully subscribed!' is visible
+    await expect(page.locator('div[class="alert-success alert"]')).toBeVisible();
+});
+
+    //Test case 12: Add product in cart
+test('Test case 12: Add product in cart', async ({page}) => {
+    // to block ads and trackers.
+    await page.route('**/*google*/**', route => route.abort());
+    await page.route('**/*doubleclick*/**', route => route.abort());
+    await page.route('**/*adservice*/**', route => route.abort());
+
+    // Go to the automation exercise website
+    await page.goto('https://automationexercise.com/');
+
+    //verify that home page is visible successfully
+    await expect(page).toHaveURL('https://automationexercise.com/');
+
+    //click on 'Products' button
+    await page.locator('a[href="/products"]').click();
+
+    //verify user is navigated to PRODUCTS page successfully
+    await expect(page).toHaveURL('https://automationexercise.com/products');
+
+    //click on the first product
+    await page.locator('a[href="/product_details/1"]').first().click();
+
+    //verify user is navigated to PRODUCT DETAILS page successfully
+    await expect(page).toHaveURL('https://automationexercise.com/product_details/1');
+
+    //increase quantity
+    await page.locator('a[onclick="changeQuantity(1)"]').click();
+
+    //click on 'Add to cart' button
+    await page.locator('button:has-text("Add to cart")').click();
+
+    //verify success message 'Product added to cart' is visible
+    await expect(page.locator('div[class="alert-success alert"]')).toBeVisible();
+})
+
+    // Test Case 13: Verify product quantity in cart
+test('Test case 13: Verify product quantity in cart', async ({page}) => {
+    // to block ads and trackers.
+    await page.route('**/*google*/**', route => route.abort());
+    await page.route('**/*doubleclick*/**', route => route.abort());
+    await page.route('**/*adservice*/**', route => route.abort());
+
+    // Go to the automation exercise website
+    await page.goto('https://automationexercise.com/');
+
+    //verify that home page is visible successfully
+    await expect(page).toHaveURL('https://automationexercise.com/');
+
+    //click view product on any product on home page
+    await page.locator('a[href="/product_details/1"]').click();
+
+    //verify product detail is opened   
+    await expect(page.locator('div[class="product-information"]')).toBeVisible();
+
+    //increase quantity to 4
+    await page.locator('a[onclick="changeQuantity(1)"]').click();
+    await page.locator('a[onclick="changeQuantity(1)"]').click();
+    await page.locator('a[onclick="changeQuantity(1)"]').click();
+
+    //click 'Add to cart' button
+    await page.locator('button:has-text("Add to cart")').click();
+
+    //click 'View Cart' button
+    await page.locator('a:has-text("View Cart")').click();
+
+    //verify that product displayed in cart page with exact quantity
+    await expect(page.locator('td.cart_quantity')).toHaveText('4');
+});
+
+    //Test Case 14: Place Order: Register while checkout.
+test.only('Test Case 14: Place Order: Register while checkout.' , async ({page}) =>{
+    //To block ads and trackers
+    await page.route('**/*google*/**/' , route => route.abort());
+    await page.route('**/*doubleclick*/**' , route => route.abort());
+    await page.route('**/*adservice*/**' , route => route.abort());
+
+    //Go to website
+    await page.goto('https://automationexercise.com/');
+
+    //Verify that home page is visible successfully
+    await expect(page).toHaveURL('https://automationexercise.com');
+
+    // Add products to cart
+    await page.locator('a[data-product-id="1"]').nth(0).click();
+    //click continue shopping button
+    await page.locator('button:has-text("Continue Shopping")').click();
+    //add product 2 to cart
+    await page.locator('a[data-product-id="2"]').nth(0).click();
+    //click continue shopping button
+    await page.locator('button:has-text("Continue Shopping")').click();
+
+    //click 'Cart' button
+    await page.locator('a[href="/view_cart"]').nth(0).click();
+
+    //verify that the cart page is visible
+    await expect(page.locator('div.cart_info')).toBeVisible();
+
+    //click 'Proceed To Checkout' button
+    await page.locator('a:has-text("Proceed To Checkout")').click();
+
+    //click 'Register / Login' button
+    await page.locator('a[href="/login"]').nth(1).click();
+
+    //fill in all the details in signup form and create account
+    await page.locator('input[data-qa="signup-name"]').fill('Joseph Seven');
+    await page.locator('input[data-qa="signup-email"]').fill('joseph.temitope@example.com');
+    await page.locator('button[data-qa="signup-button"]').click();
+
+    await page.locator('input[id="id_gender1"]').check();
+    await page.locator('input[id="password"]').fill('Password123');
+    await page.locator('select[id="days"]').selectOption('1');
+    await page.locator('select[id="months"]').selectOption('January');
+    await page.locator('select[id="years"]').selectOption('2000');
+    
+    //fill in address details
+    await page.locator('input[id="first_name"]').fill('Joseph');
+    await page.locator('input[id="last_name"]').fill('Seven');
+    await page.locator('input[id="company"]').fill('Example Company');
+    await page.locator('input[id="address1"]').fill('123 Main St');
+    await page.locator('input[id="address2"]').fill('Apt 4B');
+    await page.locator('select[id="country"]').selectOption('United States');
+    await page.locator('input[id="state"]').fill('California');
+    await page.locator('input[id="city"]').fill('Los Angeles');
+    await page.locator('input[id="zipcode"]').fill('90001');
+    await page.locator('input[id="mobile_number"]').fill('+1234567890');
+
+    //click 'Create Account' button
+    await page.locator('button[data-qa="create-account"]').click();
+
+    //verify that 'ACCOUNT CREATED!' is visible and click 'Continue' button
+    await expect(page.locator('h2:has-text("Account Created!")')).toBeVisible();
+    await page.locator('a:has-text("Continue")').click();
+
+    //verify that 'Logged in as username' is visible
+    await expect(page.locator('a:has-text("Logged in as Joseph Seven")')).toBeVisible();
+
+    //click 'Cart' button
+    await page.locator('a[href="/view_cart"]').nth(0).click();
+
+    //click proceed to checkout button
+    await page.locator('a:has-text("Proceed To Checkout")').click();
+
+    //Verify address details and review your order
+    await page.locator('div[class="checkout-information"]').scrollIntoViewIfNeeded();
+
+    //Enter description in comment text area and click 'Place Order'
+    await page.locator('textarea[name="message"]').fill('Please deliver between 9 AM and 5 PM.');
+    await page.locator('a:has-text("Place Order")').click();
+
+    //enter payment details: Name on Card, Card Number, CVC, Expiration date
+    await page.locator('input[name="name_on_card"]').fill('Joseph Seven');
+    await page.locator('input[name="card_number"]').fill('4111111111111111');
+    await page.locator('input[name="cvc"]').fill('123');
+    await page.locator('input[name="expiry_month"]').fill('12');
+    await page.locator('input[name="expiry_year"]').fill('2025');
+
+    //click 'Pay and Confirm Order' button
+    await page.locator('button:has-text("Pay and Confirm Order")').click();
+
+    //verify success message 'Your order has been placed successfully!' is visible
+    //await expect(page.locator('p:has-text("Your order has been placed successfully!")')).toBeVisible();
+
+    //click 'Delete Account' button
+    await page.locator('a[href="/delete_account"]').nth(0).click();
+
+    //verify that 'ACCOUNT DELETED!' is visible and click 'Continue' button
+    await expect(page.locator('h2:has-text("ACCOUNT DELETED!")')).toBeVisible();
+    await page.locator('a:has-text("Continue")').click();
 });
