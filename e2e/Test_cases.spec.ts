@@ -533,7 +533,7 @@ test('Test case 13: Verify product quantity in cart', async ({page}) => {
 });
 
     //Test Case 14: Place Order: Register while checkout.
-test.only('Test Case 14: Place Order: Register while checkout.' , async ({page}) =>{
+test('Test Case 14: Place Order: Register while checkout.' , async ({page}) =>{
     //To block ads and trackers
     await page.route('**/*google*/**/' , route => route.abort());
     await page.route('**/*doubleclick*/**' , route => route.abort());
@@ -632,3 +632,102 @@ test.only('Test Case 14: Place Order: Register while checkout.' , async ({page})
     await expect(page.locator('h2:has-text("ACCOUNT DELETED!")')).toBeVisible();
     await page.locator('a:has-text("Continue")').click();
 });
+
+    //Test case 15:Place Order: Register before checkout
+test.only('Test case 15:Place Order: Register before checkout' , async ({page}) => {
+    //to block ads and trackers
+    await page.route('**/*google*/**' , route => route.abort());
+    await page.route('**/*doubleclick*/**' , route => route.abort());
+    await page.route('**/*adservice*/**' , route => route.abort());
+
+    //Navigate to website
+    await page.goto('https://automationexercise.com/');
+
+    //Verify that home page is visible
+    await expect(page).toHaveURL('https://automationexercise.com/');
+
+    //click signup/login button
+    await page.locator('a[href="/login"]').nth(0).click();
+
+    //5.Fill all details in signup and create account
+
+    // Generate a random email
+const randomEmail = `testuser_${Date.now()}@example.com`;
+
+    await page.locator('input[data-qa="signup-name"]').fill('Joseph Ogunsuada');
+    await page.locator('input[data-qa="signup-email"]').fill(randomEmail)
+    await page.locator('button:has-text("Signup")').click();
+
+    //enter account information
+    await page.locator('input[id="id_gender1"]').check();
+    await page.locator('input[id="password"]').fill('Password123');
+    await page.locator('select[id="days"]').selectOption('1');
+    await page.locator('select[id="months"]').selectOption('January');
+    await page.locator('select[id="years"]').selectOption('2004')
+
+    //Enter address information
+    await page.locator('input[id="first_name"]').fill('Joseph');
+    await page.locator('input[id="last_name"]').fill('Joseph');
+    await page.locator('input[id="company"]').fill('Seven');
+    await page.locator('input[id="address1"]').fill('77 apata street');
+    await page.locator('input[id="address2"]').fill('Lasu Epe');
+    await page.locator('select[id="country"]').selectOption('Canada');
+    await page.locator('input[id="state"]').fill('Toronto');
+    await page.locator('input[id="city"]').fill('Toronto');
+    await page.locator('input[id="zipcode"]').fill('100011');
+    await page.locator('input[id="mobile_number"]').fill('09018150913');
+    //click create account
+    await page.locator('button:has-text("Create Account")').click();
+
+    // 6. Verify 'ACCOUNT CREATED!' and click 'Continue' button
+    await expect(page.locator('h2:has-text("Account Created!")')).toBeVisible();
+    await page.locator('a:has-text("Continue")').click();
+
+    // 7. Verify ' Logged in as username' at top
+    await page.locator('a:has-text("Logged in as Joseph Ogunsuada")')
+
+    // 8. Add products to cart
+    await page.locator('a[data-product-id="1"]').nth(0).click();
+    await page.locator('button:has-text("Continue Shopping")').click();
+    await page.locator('a[data-product-id="2"]').nth(0).click();
+    await page.locator('button:has-text("Continue Shopping")').click();
+    await page.locator('a[data-product-id="3"]').nth(0).click();
+    await page.locator('button:has-text("Continue Shopping")').click();
+
+    // 9. Click 'Cart' button
+    await page.locator('a[href="/view_cart"]').nth(0).click();
+
+    // 10. Verify that cart page is displayed
+    //await expect(page.locator('div[id="cart_info"]')).toBeVisible();
+
+    // 11. Click Proceed To Checkout
+    await page.locator('a:has-text("Proceed To Checkout")').click();
+
+    // 12. Verify Address Details and Review Your Order
+    await page.locator('div[class="checkout-information"]').scrollIntoViewIfNeeded();
+
+    // 13. Enter description in comment text area and click 'Place Order'
+    await page.locator('textarea[name="message"]').fill('please be be quick with the delivery');
+    await page.locator('a:has-text("Place Order")').click();
+
+    // 14. Enter payment details: Name on Card, Card Number, CVC, Expiration date
+    await page.locator('input[data-qa="name-on-card"]').fill('Joseph Seven');
+    await page.locator('input[data-qa="card-number"]').fill('411111111111111');
+    await page.locator('input[data-qa="cvc"]').fill('311');
+    await page.locator('input[data-qa="expiry-month"]').fill('07');
+    await page.locator('input[data-qa="expiry-year"]').fill('2028');
+
+    // 15. Click 'Pay and Confirm Order' button
+    await page.locator('button[data-qa="pay-button"]').click();
+
+    //16. Verify success message 'Your order has been placed successfully!'
+    //await expect(page.locator('p:has-text("Your order has been placed successfully!")')).toBeVisible();
+    
+    // 17. Click 'Delete Account' button
+    await page.locator('a[href="/delete_account"]').click();
+
+    //18. Verify 'ACCOUNT DELETED!' and click 'Continue' button
+    await expect(page.locator('h2:has-text("Account Deleted!")')).toBeVisible();
+    await page.locator('a:has-text("Continue")').click();
+});
+
