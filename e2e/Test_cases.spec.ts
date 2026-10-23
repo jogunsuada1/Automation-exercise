@@ -634,7 +634,7 @@ test('Test Case 14: Place Order: Register while checkout.' , async ({page}) =>{
 });
 
     //Test case 15:Place Order: Register before checkout
-test.only('Test case 15:Place Order: Register before checkout' , async ({page}) => {
+test('Test case 15:Place Order: Register before checkout' , async ({page}) => {
     //to block ads and trackers
     await page.route('**/*google*/**' , route => route.abort());
     await page.route('**/*doubleclick*/**' , route => route.abort());
@@ -731,3 +731,209 @@ const randomEmail = `testuser_${Date.now()}@example.com`;
     await page.locator('a:has-text("Continue")').click();
 });
 
+    //Test case 16: Place Order: Login before Checkout
+test('Test case 16: Place Order: Login before Checkout' , async ({page}) => {
+    // To block all ads
+    await page.route('**/*google*/**' , route => route.abort());
+    await page.route('**/*doubleclick*/**' ,route => route.abort());
+    await page.route('**/*adservice*/**' , route => route.abort());
+
+    // Go to website
+    await page.goto('https://automationexercise.com/')
+
+    // Verify that home page is visible
+    await expect(page).toHaveURL('https://automationexercise.com/')
+
+    // Click signup and login button
+    await page.locator('a[href="/login"]').nth(0).click();
+
+    //  Fill email, password and click 'Login' button
+    await page.locator('input[data-qa="login-email"]').fill('jostemi70@gmail.com');
+    await page.locator('input[data-qa="login-password"]').fill('12345678');
+    await page.locator('button[data-qa="login-button"]').click();
+
+    //  Verify 'Logged in as username' at top
+    await expect(page.getByText(/Logged in as/i)).toBeVisible();
+
+    // 7. Add products to cart
+    await page.locator('a[data-product-id="1"]').nth(0).click();
+    await page.locator('button:has-text("Continue Shopping")').click();
+    await page.locator('a[data-product-id="2"]').nth(0).click();
+    await page.locator('button:has-text("Continue Shopping")').click();
+    await page.locator('a[data-product-id="3"]').nth(0).click();
+    await page.locator('button:has-text("Continue Shopping")').click();
+
+    // 8. Click 'Cart' button
+    await page.locator('a[href="/view_cart"]').nth(0).click();
+
+    // 9. Verify that cart page is displayed
+    await expect(page).toHaveURL('https://automationexercise.com/view_cart');
+    await page.locator('div[id="cart_info"]').scrollIntoViewIfNeeded();
+
+    // 10. Click Proceed To Checkout
+    await page.locator('a:has-text("Proceed To Checkout")').click();
+
+    // 11. Verify Address Details and Review Your Order
+    await page.locator('div[class="checkout-information"]').scrollIntoViewIfNeeded();
+    await page.locator('div[id="cart_info"]').scrollIntoViewIfNeeded();
+
+    // 12. Enter description in comment text area and click 'Place Order'
+    await page.locator('textarea[name="message"]').fill('I need quick delivery');
+    await page.locator('a[href="/payment"]').click();
+
+    //13. Enter payment details: Name on Card, Card Number, CVC, Expiration date
+    await page.locator('input[data-qa="name-on-card"]').fill('Joseph Ogunsuada');
+    await page.locator('input[data-qa="card-number"]').fill('12345678987654567');
+    await page.locator('input[data-qa="cvc"]').fill('123');
+    await page.locator('input[data-qa="expiry-month"]').fill('12');
+    await page.locator('input[data-qa="expiry-year"]').fill('2034');
+
+    //14. Click 'Pay and Confirm Order' button
+    await page.locator('button[data-qa="pay-button"]').click();
+
+    //15. Verify success message 'Your order has been placed successfully!'
+    //await expect(page.locator('p:has-text("Your order has been placed successfully!")')).toBeVisible();
+
+
+});
+
+    //Test case 17: Remove Products From Cart
+test('Test case 17: Remove Products From Cart' , async ({page}) => {
+    // To block all ads
+    await page.route('**/*google*/**' , route => route.abort());
+    await page.route('**/*doubleclick*/**' ,route => route.abort());
+    await page.route('**/*adservice*/**' , route => route.abort());
+
+    // Go to website
+    await page.goto('https://automationexercise.com/');
+
+    // Verify that home page is visible
+    await expect(page).toHaveURL('https://automationexercise.com/');
+
+    // 7. Add products to cart
+    await page.locator('a[data-product-id="1"]').nth(0).click();
+    await page.locator('button:has-text("Continue Shopping")').click();
+    await page.locator('a[data-product-id="2"]').nth(0).click();
+    await page.locator('button:has-text("Continue Shopping")').click();
+    await page.locator('a[data-product-id="3"]').nth(0).click();
+    await page.locator('button:has-text("Continue Shopping")').click();
+
+    // 8. Click 'Cart' button
+    await page.locator('a[href="/view_cart"]').nth(0).click();
+
+    // 9. Verify that cart page is displayed    
+    await expect(page).toHaveURL('https://automationexercise.com/view_cart');
+    await page.locator('div[id="cart_info"]').scrollIntoViewIfNeeded();
+
+    // 10. Click 'X' button corresponding to particular product 
+    await page.locator('a.cart_quantity_delete[data-product-id="1"]').click();
+
+     await page.waitForLoadState('networkidle'); 
+
+    // 11. Verify that product is removed from the cart
+    await expect(page.locator('tr[id="product-1"]')).toHaveCount(0);
+});
+
+    // Test Case 18: View Category Products
+test('Test Case 18: View Category Products', async ({page}) => {
+    // To block all ads
+    await page.route('**/*google*/**' , route => route.abort());
+    await page.route('**/*doubleclick*/**' ,route => route.abort());
+    await page.route('**/*adservice*/**' , route => route.abort());
+
+    //Go to website
+    await page.goto('https://automationexercise.com/');
+
+    //Verify that home page is visible
+    await expect(page).toHaveURL('https://automationexercise.com/');
+
+    //Click on 'Women' category
+    await page.locator('a[href="#Women"]').click();
+
+    //click on any category link under 'Women' category, for example: Dress
+    await page.locator('a[href="/category_products/2"]').nth(0).click();
+
+    // Verify that category page is displayed and confirm text 'WOMEN - TOPS PRODUCTS'
+    await expect(page).toHaveURL('https://automationexercise.com/category_products/2');
+    await expect(page.locator('h2:has-text("Women - Tops Products")')).toBeVisible();
+
+    //On left side bar, click on any sub-category link of category, for example: T-shirts
+    await page.locator('a[href="#Men"]').click();
+    await page.locator('a[href="/category_products/3"]').nth(0).click();
+
+    // Verify that user is navigated to that category page
+    await expect(page).toHaveURL('https://automationexercise.com/category_products/3');
+});
+
+    // Test Case 19: View & Cart Brand Products
+test('Test Case 19: View & Cart Brand Products', async ({page}) => {
+    // To block all ads
+    await page.route('**/*google*/**' , route => route.abort());
+    await page.route('**/*doubleclick*/**' ,route => route.abort());
+    await page.route('**/*adservice*/**' , route => route.abort());
+
+    //Go to website
+    await page.goto('https://automationexercise.com/');
+
+    //Verify that home page is visible
+    await expect(page).toHaveURL('https://automationexercise.com/');
+
+    // Click on Products button
+    await page.locator('a[href="/products"]').click();
+
+    //verify that brands are visible on left side bar
+    await expect(page.locator('div[class="brands_products"]')).toBeVisible();
+
+    // Click on any brand name, for example: Polo
+    await page.locator('a[href="/brand_products/Polo"]').click();
+
+    // Verify that user is navigated to brand page and brand products are displayed
+    await expect(page).toHaveURL('https://automationexercise.com/brand_products/Polo');
+    await expect(page.locator('h2:has-text("Brand - Polo Products")')).toBeVisible();
+
+    // On the left side bar, click on any other brand link, for example: BABYHUG
+    await page.locator('a[href="/brand_products/Babyhug"]').click();
+
+    // Verify that user is navigated to that brand page and can see products
+    await expect(page).toHaveURL('https://automationexercise.com/brand_products/Babyhug');
+    await expect(page.locator('h2:has-text("Brand - BABYHUG Products")')).toBeVisible();
+})
+
+    // Test Case 20: Search Products and Verify Cart After Login
+test('Test Case 20: Search Products and Verify Cart After Login', async ({page}) => {
+    // To block all ads
+    await page.route('**/*google*/**' , route => route.abort());
+    await page.route('**/*doubleclick*/**' ,route => route.abort());
+    await page.route('**/*adservice*/**' , route => route.abort());
+
+    //Go to website
+    await page.goto('https://automationexercise.com/');
+
+    // Click on Products button
+    await page.locator('a[href="/products"]').click();
+
+    // Verify that user is navigated to ALL PRODUCTS page successfully
+    await expect(page).toHaveURL('https://automationexercise.com/products');
+
+    //  Enter product name in search input and click search button
+    await page.locator('input[id="search_product"]').fill('Top');
+    await page.locator('button[id="submit_search"]').click();
+
+    // Verify 'SEARCHED PRODUCTS' is visible
+    await expect(page.locator('h2:has-text("Searched Products")')).toBeVisible();
+
+    // Verify that all the products related to search are visible
+    const searchRESULTS = page.locator('div.features_items');
+    await expect(searchRESULTS).toBeVisible();
+
+    // the search result has products more than 0
+    await expect(searchRESULTS).not.toHaveCount(0);
+
+    // all  the items have Top in their name
+    const productNames = await page.locator('.productinfo p').allInnerTexts();
+
+    for (const name of productNames) {
+        expect(name.toLowerCase()).toContain('top');
+    }
+    //test fails hereee
+});
