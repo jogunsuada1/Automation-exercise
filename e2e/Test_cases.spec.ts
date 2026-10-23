@@ -935,5 +935,40 @@ test('Test Case 20: Search Products and Verify Cart After Login', async ({page})
     for (const name of productNames) {
         expect(name.toLowerCase()).toContain('top');
     }
-    //test fails hereee
+    //test fails heree 
+});
+
+    // Test case 21: Add review on product
+test.only('Test case 21: Add review on product', async ({page}) => {
+    // To block all ads
+    await page.route('**/*google*/**' , route => route.abort());
+    await page.route('**/*doubleclick*/**' ,route => route.abort());
+    await page.route('**/*adservice*/**' , route => route.abort());
+
+    //Go to website
+    await page.goto('https://automationexercise.com/');
+
+    // Click on Products button
+    await page.locator('a[href="/products"]').click();
+
+    // Verify that user is navigated to ALL PRODUCTS page successfully
+    await expect(page).toHaveURL('https://automationexercise.com/products');
+    await expect(page.locator('h2:has-text("All Products")')).toBeVisible();
+
+    // Click on 'View Product' of first product
+    await page.locator('a[href="/product_details/1"]').click();
+
+    // Verify write your review is visible
+    await expect(page.locator('a:has-text("Write Your Review")')).toBeVisible();
+
+    //Enter name, email and review
+    await page.locator('input[id="name"]').fill('Joseph Ogunsuada');
+    await page.locator('input[id="email"]').fill('jostemi70@gmail');
+    await page.locator('textarea[id="review"]').fill('This is a great product!');
+
+    // click 'Submit' button
+    await page.locator('button[id="button-review"]').click();
+
+    // Verify success message 'Thank you for your review.' is visible
+    await expect(page.locator('div.alert-success:has-text("Thank you for your review.")').nth(0)).toBeVisible();
 });
