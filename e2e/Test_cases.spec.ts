@@ -1,4 +1,5 @@
 import {test , expect} from '@playwright/test';
+import { text } from 'stream/iter';
 
 // test caeses for automation exercise website
 test('Test case 1: Resgister user.', async ({page}) => {
@@ -939,7 +940,7 @@ test('Test Case 20: Search Products and Verify Cart After Login', async ({page})
 });
 
     // Test case 21: Add review on product
-test.only('Test case 21: Add review on product', async ({page}) => {
+test('Test case 21: Add review on product', async ({page}) => {
     // To block all ads
     await page.route('**/*google*/**' , route => route.abort());
     await page.route('**/*doubleclick*/**' ,route => route.abort());
@@ -971,4 +972,312 @@ test.only('Test case 21: Add review on product', async ({page}) => {
 
     // Verify success message 'Thank you for your review.' is visible
     await expect(page.locator('div.alert-success:has-text("Thank you for your review.")').nth(0)).toBeVisible();
+});
+
+    // Test Case 22: Add to cart from Recommended items
+test('Test Case 22: Add to cart from Recommended items', async ({page}) => {
+    // To block all ads
+    await page.route('**/*google*/**' , route => route.abort());
+    await page.route('**/*doubleclick*/**' ,route => route.abort());
+    await page.route('**/*adservice*/**' , route => route.abort());
+
+    //Go to website
+    await page.goto('https://automationexercise.com/');
+
+    // Scroll down to footer
+    await page.locator('footer').scrollIntoViewIfNeeded();
+
+    //verify 'RECOMMENDED ITEMS' is visible
+    await expect(page.locator('h2:has-text("Recommended Items")')).toBeVisible();
+
+    // Click on 'Add to cart' button on Recommended product
+    await page.locator('a[data-product-id="1"]').nth(2).click();
+
+    // Click on 'Continue Shopping' button
+    await page.locator('button[data-dismiss="modal"]').click();
+
+    // Click on 'View Cart' button
+    await page.locator('a[href="/view_cart"]').nth(0).click();
+
+    // Verify that product is displayed in cart page    
+    await expect(page.locator('tr[id="product-1"]')).toBeVisible();
+});
+
+    //Test Case 23: Verify address details in checkout page
+test('Test Case 23: Verify address details in checkout page', async ({page}) => {
+    // To block all ads
+    await page.route('**/*google*/**' , route => route.abort());
+    await page.route('**/*doubleclick*/**' ,route => route.abort());
+    await page.route('**/*adservice*/**' , route => route.abort());
+
+    //Go to website
+    await page.goto('https://automationexercise.com/');
+
+    // Verify that home page is visible
+    await expect(page).toHaveURL('https://automationexercise.com/');
+
+    // Click on 'Signup / Login' button
+    await page.locator('a[href="/login"]').nth(0).click();
+
+     // Generate a random email
+const randomEmail = `testuser_${Date.now()}@example.com`;
+
+    await page.locator('input[data-qa="signup-name"]').fill('Joseph Ogunsuada');
+    await page.locator('input[data-qa="signup-email"]').fill(randomEmail)
+    await page.locator('button:has-text("Signup")').click();
+
+    //enter account information
+    await page.locator('input[id="id_gender1"]').check();
+    await page.locator('input[id="password"]').fill('Password123');
+    await page.locator('select[id="days"]').selectOption('1');
+    await page.locator('select[id="months"]').selectOption('January');
+    await page.locator('select[id="years"]').selectOption('2004')
+
+    //Enter address information
+    await page.locator('input[id="first_name"]').fill('Joseph');
+    await page.locator('input[id="last_name"]').fill('Ogunsuada');
+    await page.locator('input[id="company"]').fill('Seven');
+    await page.locator('input[id="address1"]').fill('77 apata street');
+    await page.locator('input[id="address2"]').fill('Lasu Epe');
+    await page.locator('select[id="country"]').selectOption('Canada');
+    await page.locator('input[id="state"]').fill('Toronto');
+    await page.locator('input[id="city"]').fill('Toronto');
+    await page.locator('input[id="zipcode"]').fill('100011');
+    await page.locator('input[id="mobile_number"]').fill('09018150913');
+    //click create account
+    await page.locator('button:has-text("Create Account")').click();
+
+    // 6. Verify 'ACCOUNT CREATED!' and click 'Continue' button
+    await expect(page.locator('h2:has-text("Account Created!")')).toBeVisible();
+    await page.locator('a:has-text("Continue")').click();
+
+    // Verify ' Logged in as username' at top
+    await expect(page.locator('a:has-text("Logged in as Joseph Ogunsuada")')).toBeVisible();
+
+    // Add products to cart
+    await page.locator('a[data-product-id="1"]').nth(0).click();
+    await page.locator('button[data-dismiss="modal"]').click();
+    await page.locator('a[data-product-id="2"]').nth(0).click();
+    await page.locator('button[data-dismiss="modal"]').click();
+    await page.locator('a[data-product-id="3"]').nth(0).click();
+    await page.locator('button[data-dismiss="modal"]').click();
+
+    // Click 'Cart' button
+    await page.locator('a[href="/view_cart"]').nth(0).click();
+
+    // Verify that cart page is displayed
+    await expect(page).toHaveURL('https://automationexercise.com/view_cart');
+    await page.locator('div[id="cart_info"]').scrollIntoViewIfNeeded();
+
+    // Click 'Proceed To Checkout' button
+    await page.locator('a.check_out').click();
+
+    // Verify That the delivery address is same address filled at the time registration of account
+    const deliveryAddress = await page.locator('ul[id="address_delivery"]').innerText();
+    expect(deliveryAddress).toContain('Joseph Ogunsuada');
+    expect(deliveryAddress).toContain('77 apata street');
+    expect(deliveryAddress).toContain('Lasu Epe');
+    expect(deliveryAddress).toContain('Toronto');
+    expect(deliveryAddress).toContain('Canada');
+    expect(deliveryAddress).toContain('100011');
+    expect(deliveryAddress).toContain('09018150913');
+
+    // Verify That the billing address is same address filled at the time registration of account
+    const billingAddress = await page.locator('ul[id="address_invoice"]').innerText();
+    expect(billingAddress).toContain('Joseph Ogunsuada');
+    expect(billingAddress).toContain('77 apata street');
+    expect(billingAddress).toContain('Lasu Epe');
+    expect(billingAddress).toContain('Toronto');
+    expect(billingAddress).toContain('Canada');
+    expect(billingAddress).toContain('100011');
+    expect(billingAddress).toContain('09018150913');
+
+    // click 'Delete Account' button
+    await page.locator('a[href="/delete_account"]').click();
+
+    // Verify that 'ACCOUNT DELETED!' is visible and click 'Continue' button
+    await expect(page.locator('h2:has-text("Account Deleted!")')).toBeVisible();
+    await page.locator('a:has-text("Continue")').click();
+});
+
+    //Test Case 24: Download Invoice after purchase order
+test('Test Case 24: Download Invoice after purchase order', async ({page}) => {
+    // To block all ads
+    await page.route('**/*google*/**' , route => route.abort());
+    await page.route('**/*doubleclick*/**' ,route => route.abort());
+    await page.route('**/*adservice*/**' , route => route.abort());
+
+    //Go to website
+    await page.goto('https://automationexercise.com/');
+
+    // Verify that home page is visible
+    await expect(page).toHaveURL('https://automationexercise.com/');
+
+    // Add products to cart
+    await page.locator('a[data-product-id="1"]').nth(0).click();
+    await page.locator('button[data-dismiss="modal"]').click();
+    await page.locator('a[data-product-id="2"]').nth(0).click();
+    await page.locator('button[data-dismiss="modal"]').click();
+    await page.locator('a[data-product-id="3"]').nth(0).click();
+    await page.locator('button[data-dismiss="modal"]').click();
+
+    // Click 'Cart' button
+    await page.locator('a[href="/view_cart"]').nth(0).click();
+
+    // Verify that cart page is displayed
+    await expect(page).toHaveURL('https://automationexercise.com/view_cart');
+    await page.locator('div[id="cart_info"]').scrollIntoViewIfNeeded();
+
+    // Click 'Proceed To Checkout' button
+    await page.locator('a.check_out').click();
+
+    // click 'Register / Login' button
+    await page.locator('a[href="/login"]').nth(1).click();
+
+    // fill all details in signup and create account
+    const randomEmail = `testuser_${Date.now()}@example.com`
+    await page.locator('input[data-qa="signup-name"]').fill('Joseph Ogunsuada');
+    await page.locator('input[data-qa="signup-email"]').fill(randomEmail);
+    await page.locator('button[data-qa="signup-button"]').click();
+
+    //enter account information
+    await page.locator('input[id="id_gender1"]').check();
+    await page.locator('input[id="password"]').fill('Password123');
+    await page.locator('select[id="days"]').selectOption('1');
+    await page.locator('select[id="months"]').selectOption('January');
+    await page.locator('select[id="years"]').selectOption('2004');
+    await page.locator('input[id="first_name"]').fill('Joseph');
+    await page.locator('input[id="last_name"]').fill('Ogunsuada');
+    await page.locator('input[id="company"]').fill('Seven');
+    await page.locator('input[id="address1"]').fill('77 apata street');
+    await page.locator('input[id="address2"]').fill('Lasu Epe');
+    await page.locator('select[id="country"]').selectOption('Canada');
+    await page.locator('input[id="state"]').fill('Toronto');
+    await page.locator('input[id="city"]').fill('Toronto');
+    await page.locator('input[id="zipcode"]').fill('100011');
+    await page.locator('input[id="mobile_number"]').fill('09018150913');
+    //click 'Create Account' button
+    await page.locator('button[data-qa="create-account"]').click();
+
+    //verify that 'ACCOUNT CREATED!' is visible and click 'Continue' button
+    await expect(page.locator('h2:has-text("Account Created!")')).toBeVisible();
+    await page.locator('a:has-text("Continue")').click();
+
+    // click 'Cart' button
+    await page.locator('a[href="/view_cart"]').nth(0).click();
+
+    // click 'Proceed To Checkout' button
+    await page.locator('a.check_out').click();
+
+    //verify address details and review your order
+    await page.locator('div[class="checkout-information"]').scrollIntoViewIfNeeded();
+    // Verify That the delivery address is same address filled at the time registration of account
+    const deliveryAddress = await page.locator('ul[id="address_delivery"]').innerText();
+    expect(deliveryAddress).toContain('Joseph Ogunsuada');
+    expect(deliveryAddress).toContain('77 apata street');
+    expect(deliveryAddress).toContain('Lasu Epe');
+    expect(deliveryAddress).toContain('Toronto');
+    expect(deliveryAddress).toContain('Canada');
+    expect(deliveryAddress).toContain('100011');
+    expect(deliveryAddress).toContain('09018150913');
+
+    // Verify That the billing address is same address filled at the time registration of account
+    const billingAddress = await page.locator('ul[id="address_invoice"]').innerText();
+    expect(billingAddress).toContain('Joseph Ogunsuada');
+    expect(billingAddress).toContain('77 apata street');
+    expect(billingAddress).toContain('Lasu Epe');
+    expect(billingAddress).toContain('Toronto');
+    expect(billingAddress).toContain('Canada');
+    expect(billingAddress).toContain('100011');
+    expect(billingAddress).toContain('09018150913');
+
+    //enter description in comment text area and click 'Place Order'
+    await page.locator('textarea[name="message"]').fill('Please deliver between 9 AM and 5 PM.');
+    await page.locator('a[href="/payment"]').click(); //click 'Place Order' button
+
+    //enter payment details: Name on Card, Card Number, CVC, Expiration date
+    await page.locator('input[data-qa="name-on-card"]').fill('Joseph Ogunsuada');
+    await page.locator('input[data-qa="card-number"]').fill('4111111111111111');
+    await page.locator('input[data-qa="cvc"]').fill('123');
+    await page.locator('input[data-qa="expiry-month"]').fill('12');
+    await page.locator('input[data-qa="expiry-year"]').fill('2025');
+
+    //click 'Pay and Confirm Order' button
+    await page.locator('button[data-qa="pay-button"]').click();
+
+    //verify success message 'Your order has been placed successfully!' is visible
+    await expect(page.locator('div.alert-success')).toBeVisible();
+
+    //click 'Download Invoice' button and verify invoice is downloaded successfully.
+    const [download] = await Promise.all([
+        page.waitForEvent('download'), // Wait for the download to start
+        page.locator('a[href="/download_invoice/900"]').click() // Click the download button
+    ]);
+
+    // Save the downloaded file to a specific path
+    const downloadPath = await download.path();
+    console.log(`Invoice downloaded to: ${downloadPath}`);
+
+    //click 'Delete Account' button
+    await page.locator('a[href="/delete_account"]').click();
+
+    //verify that 'ACCOUNT DELETED!' is visible and click 'Continue' button
+    await expect(page.locator('h2:has-text("Account Deleted!")')).toBeVisible();
+    await page.locator('a:has-text("Continue")').click();
+}
+);
+
+    // Test Case 25: Verify Scroll Up using 'Arrow' button and Scroll Down functionality
+test('Test Case 25: Verify Scroll Up using Arrow button and Scroll Down functionality', async ({page}) => {
+    // To block all ads
+    await page.route('**/*google*/**' , route => route.abort());
+    await page.route('**/*doubleclick*/**' ,route => route.abort());
+    await page.route('**/*adservice*/**' , route => route.abort());
+
+    //Go to website 
+    await page.goto('https://automationexercise.com/');
+
+    //verify that home page is visible
+    await expect(page).toHaveURL('https://automationexercise.com/');
+
+    // Scroll down page to bottom
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+    await page.waitForTimeout(2000); // Wait for 2 seconds
+
+    // Verify that 'SUBSCRIPTION' is visible
+    await expect(page.locator('h2:has-text("Subscription")')).toBeVisible();
+
+    // Click on arrow at bottom right side to move upward
+    await page.locator('a[id="scrollUp"]').click();
+
+    // Verify that page is scrolled up and 'Full-Fledged practice website for Automation Engineers' text is visible on screen
+    await expect(page.locator('h2:has-text("Full-Fledged practice website for Automation Engineers")').nth(0)).toBeVisible();
+});
+
+    // Test Case 26: Verify Scroll Up without 'Arrow' button and Scroll Down functionality
+test.only('Test Case 26: Verify Scroll Up without Arrow button and Scroll Down functionality', async ({page}) => {
+    // To block all ads
+    await page.route('**/*google*/**' , route => route.abort());
+    await page.route('**/*doubleclick*/**' ,route => route.abort());
+    await page.route('**/*adservice*/**' , route => route.abort());
+
+    //Go to website
+    await page.goto('https://automationexercise.com/');
+
+    //  verify that home page is visible
+    await expect(page).toHaveURL('https://automationexercise.com/');
+
+    // Scroll down page to bottom
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+    await page.waitForTimeout(2000); // Wait for 2 seconds
+
+    // Verify that 'SUBSCRIPTION' is visible
+    await expect(page.locator('h2:has-text("Subscription")')).toBeVisible();
+
+    // Scroll up page to top without clicking on arrow button
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await page.waitForTimeout(2000); // Wait for 2 seconds
+
+    // Verify that page is scrolled up and 'Full-Fledged practice website for Automation Engineers' text is visible on screen
+    await expect(page.locator('h2:has-text("Full-Fledged practice website for Automation Engineers")').nth(0)).toBeVisible();
 });
