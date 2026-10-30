@@ -1,5 +1,8 @@
 import {test , expect} from '@playwright/test';
-import { text } from 'stream/iter';
+
+function uniqueEmail(prefix = 'testuser') {
+    return `${prefix}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}@example.com`;
+}
 
 // test caeses for automation exercise website
 test('Test case 1: Resgister user.', async ({page}) => {
@@ -22,8 +25,9 @@ test('Test case 1: Resgister user.', async ({page}) => {
     await expect(page.locator('h2:has-text("New User Signup!")')).toBeVisible();
 
     //Enter name and email address
+    const randomEmail = `testuser_${Date.now()}@example.com`;
     await page.locator('input[data-qa="signup-name"]').fill('John Doe');
-    await page.locator('input[data-qa="signup-email"]').fill('joseph@example.com');
+    await page.locator('input[data-qa="signup-email"]').fill(randomEmail);
 
     //click 'Signup' button
     await page.locator('button[data-qa="signup-button"]').click();
@@ -77,7 +81,7 @@ test('Test case 1: Resgister user.', async ({page}) => {
 });
 
    // Test case 2: Verify product quantity in cart
-test('Test case 2: Verify product quantity in cart', async ({page}) => {
+test.only('Test case 2: Verify product quantity in cart', async ({page}) => {
 
      // to block ads and trackers.
     await page.route('**/*google*/**', route => route.abort());
@@ -90,6 +94,8 @@ test('Test case 2: Verify product quantity in cart', async ({page}) => {
     //verify that home page is visible successfully
     await expect(page).toHaveURL('https://automationexercise.com/');
 
+    // Resgister a email to login then logout to begin the actual test
+
     //click on 'Signup / Login' button
     await page.locator('a[href="/login"]').click();
 
@@ -97,8 +103,9 @@ test('Test case 2: Verify product quantity in cart', async ({page}) => {
     await expect(page.locator('h2:has-text("New User Signup!")')).toBeVisible();
 
     //Enter name and email address
+    const email = uniqueEmail("uuid"); // fresh every run
     await page.locator('input[data-qa="signup-name"]').fill('John Doe');
-    await page.locator('input[data-qa="signup-email"]').fill('josephseven390@gmail.com');
+    await page.locator('input[data-qa="signup-email"]').fill(email);
 
      //click 'Signup' button
     await page.locator('button[data-qa="signup-button"]').click();
@@ -134,6 +141,11 @@ test('Test case 2: Verify product quantity in cart', async ({page}) => {
     //click 'Create Account button'
     await page.locator('button[data-qa="create-account"]').click();
 
+    //click 'Continue' button
+    await page.locator('a[data-qa="continue-button"]').click();
+
+    await page.locator('a[href="/logout"]').click();
+
 
     //click on 'Signup / Login' button
     await page.locator('a[href="/login"]').click();
@@ -142,7 +154,7 @@ test('Test case 2: Verify product quantity in cart', async ({page}) => {
     await expect(page.locator('h2:has-text("Login to your account")')).toBeVisible();
 
     //enter correct email address and password
-    await page.locator('input[data-qa="login-email"]').fill('josephseven390@gmail.com');
+    await page.locator('input[data-qa="login-email"]').fill(email);
     await page.locator('input[data-qa="login-password"]').fill('Anuoluwa70@');
 
     //click 'login' button
@@ -1255,7 +1267,7 @@ test('Test Case 25: Verify Scroll Up using Arrow button and Scroll Down function
 });
 
     // Test Case 26: Verify Scroll Up without 'Arrow' button and Scroll Down functionality
-test.only('Test Case 26: Verify Scroll Up without Arrow button and Scroll Down functionality', async ({page}) => {
+test('Test Case 26: Verify Scroll Up without Arrow button and Scroll Down functionality', async ({page}) => {
     // To block all ads
     await page.route('**/*google*/**' , route => route.abort());
     await page.route('**/*doubleclick*/**' ,route => route.abort());
